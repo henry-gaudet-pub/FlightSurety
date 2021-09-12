@@ -82,7 +82,6 @@ contract FlightSuretyApp {
     constructor(address dataContractAddress) public {
         contractOwner = msg.sender;
         dataContract = IFlightSuretyData(dataContractAddress);
-        dataContract.registerAirline(msg.sender);
         operational = true;
     }
 
@@ -90,8 +89,8 @@ contract FlightSuretyApp {
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
 
-    function isOperational() public pure returns (bool) {
-        return operational; // Modify to call data contract's status
+    function isOperational() public view returns (bool) {
+        return operational;
     }
 
     /********************************************************************************************/
@@ -102,11 +101,7 @@ contract FlightSuretyApp {
      * @dev Add an airline to the registration queue
      *
      */
-    function registerAirline(address airlineToRegister)
-        external
-        pure
-    // returns (bool success, uint256 votes)
-    {
+    function registerAirline(address airlineToRegister) external view {
         dataContract.registerAirline(msg.sender);
     }
 
@@ -139,9 +134,7 @@ contract FlightSuretyApp {
         string memory flightNumber,
         uint256 timestamp,
         uint8 statusCode
-    ) internal pure {
-        
-    }
+    ) internal pure {}
 
     // Generate a request for oracles to fetch flight information
     function fetchFlightStatus(
