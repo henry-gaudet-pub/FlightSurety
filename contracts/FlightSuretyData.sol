@@ -25,10 +25,12 @@ contract FlightSuretyData is IFlightSuretyData {
      */
     constructor(address firstAirline) public {
         contractOwner = msg.sender;
-        registeredAirlines[msg.sender] = true;
+        registeredAirlines[tx.origin] = true;
         registeredAirlines[firstAirline] = true;
         operational = true;
     }
+
+    event Caller(address msgSender, address txOrigin);
 
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
@@ -51,12 +53,12 @@ contract FlightSuretyData is IFlightSuretyData {
      * @dev Modifier that requires the "ContractOwner" account to be the function caller
      */
     modifier onlyContractOwner() {
-        require(msg.sender == contractOwner, "Caller is not contract owner");
+        require(tx.origin == contractOwner, "Caller is not contract owner");
         _;
     }
 
     modifier onlyRegisteredAirlines() {
-        require(registeredAirlines[msg.sender], "Caller is not a registered airline");
+        require(registeredAirlines[tx.origin], "Caller is not a registered airline");
         _;
     }
 
@@ -102,6 +104,8 @@ contract FlightSuretyData is IFlightSuretyData {
      */
     function registerAirline(address airlineToRegister) external requireIsOperational onlyRegisteredAirlines {
         require(!registeredAirlines[airlineToRegister], "Airline is already registered");
+
+        emit Caller(msg.sender, tx.origin);
 
         registeredAirlines[airlineToRegister] = true;
     }

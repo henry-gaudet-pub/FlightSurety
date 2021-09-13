@@ -17,7 +17,7 @@ contract FlightSuretyApp {
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
 
-    // Flight status codees
+    // Flight status codes
     uint8 private constant STATUS_CODE_UNKNOWN = 0;
     uint8 private constant STATUS_CODE_ON_TIME = 10;
     uint8 private constant STATUS_CODE_LATE_AIRLINE = 20;
@@ -36,6 +36,12 @@ contract FlightSuretyApp {
     bool private operational;
     mapping(bytes32 => Flight) private flights;
     IFlightSuretyData dataContract;
+
+    event ContractOwner(address contractOwner);
+    event MessageSender(address messageSender);
+    event Testing(string testing);
+    event AppCaller(address caller);
+    event OracleRegistered(address oracle, uint8 index0, uint8 index1, uint8 index2);
 
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
@@ -102,7 +108,7 @@ contract FlightSuretyApp {
      *
      */
     function registerAirline(address airlineToRegister) external view {
-        dataContract.registerAirline(msg.sender);
+        dataContract.registerAirline(airlineToRegister);
     }
 
     /**
@@ -216,11 +222,13 @@ contract FlightSuretyApp {
     // Register an oracle with the contract
     function registerOracle() external payable {
         // Require registration fee
-        require(msg.value >= REGISTRATION_FEE, "Registration fee is required");
+        require(msg.value >= REGISTRATION_FEE, "Registration fee is required, expected ");
 
         uint8[3] memory indexes = generateIndexes(msg.sender);
 
         oracles[msg.sender] = Oracle({isRegistered: true, indexes: indexes});
+
+        emit OracleRegistered(msg.sender, indexes[0], indexes[1], indexes[2]);
     }
 
     function getMyIndexes() external view returns (uint8[3]) {
