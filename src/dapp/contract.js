@@ -29,9 +29,8 @@ import Web3 from 'web3';
 // (8) 0x0f62d96d6675f32685bbdb8ac13cda7c23436f63efbb9d07700d8669ff12b7c4
 // (9) 0x8d5366123cb560bb606379f90a0bfd4769eecc0557f1b362dcae9012b548b1e5
 
-let oracle1 = 0;
-let oracle2 = 0;
-let oracle3 = 0;
+let accounts = [];
+
 export default class Contract {
 
     constructor(network, callback) {
@@ -50,10 +49,7 @@ export default class Contract {
         this.web3.eth.getAccounts((error, accts) => {
 
             this.owner = accts[0];
-            oracle1 = accts[7];
-            oracle2 = accts[8];
-            oracle3 = accts[9];
-            console.log(`oracle1: ${oracle1}\noracle2: ${oracle2}\noracle3: ${oracle3}\n`)
+            accounts = accts;
             let counter = 1;
 
             while (this.airlines.length < 5) {
@@ -71,10 +67,11 @@ export default class Contract {
                     console.log(`App.OracleRegistered.error: ${error}`);
                 }
                 else {
-                    console.log(result);
-                    console.log(`App.OracleRegistered.result: ${JSON.stringify(result, null, 2)}`);
+                    // console.log(`App.OracleRegistered.result: ${JSON.stringify(result, null, 2)}`);
+                    console.log(`App.OracleRegistered.result: ${result.returnValues.oracle}`);
                 }
             });
+
             // self.flightSuretyApp.events.OracleRequest((error, result) => {
             //     if (error) {
             //         console.log(`App.OracleRequest.error: ${error}`);
@@ -107,30 +104,17 @@ export default class Contract {
 
 
             let one_eth = self.web3.utils.toWei("1", "ether");
-            self.flightSuretyApp.methods.registerOracle().send({ from: oracle1, value: one_eth, gas: 5000000 }, (error, result) => {
-                if (error) {
-                    console.log(`registerOracle 1 error: ${error}`);
-                }
-                else {
-                    console.log(`registerOracle 1 result: ${result}`);
-                }
-            });
-            self.flightSuretyApp.methods.registerOracle().send({ from: oracle2, value: one_eth, gas: 5000000 }, (error, result) => {
-                if (error) {
-                    console.log(`registerOracle 2 error: ${error}`);
-                }
-                else {
-                    console.log(`registerOracle 2 result: ${result}`);
-                }
-            });
-            self.flightSuretyApp.methods.registerOracle().send({ from: oracle3, value: one_eth, gas: 5000000 }, (error, result) => {
-                if (error) {
-                    console.log(`registerOracle 3 error: ${error}`);
-                }
-                else {
-                    console.log(`registerOracle 3 result: ${result}`);
-                }
-            });
+            for (let ii = 0; ii < accounts.length; ii++) {
+                self.flightSuretyApp.methods.registerOracle().send({ from: accounts[ii], value: one_eth, gas: 5000000 }, (error, result) => {
+                    if (error) {
+                        console.log(`registerOracle ${ii} error: ${error}`);
+                    }
+                    else {
+                        // console.log(`registerOracle 1 result: ${result}`);
+                        console.log(`registering oracle ${ii}: ${accounts[ii]}`);
+                    }
+                });
+            }
 
             callback();
         });
@@ -150,6 +134,7 @@ export default class Contract {
             flight: flight,
             timestamp: Math.floor(Date.now() / 1000)
         }
+        console.log(`fetchFlightStatus: timestamp: ${payload.timestamp}`);
         self.flightSuretyApp.methods
             .fetchFlightStatus(payload.airline, payload.flight, payload.timestamp)
             .send({ from: self.owner }, (error, result) => {

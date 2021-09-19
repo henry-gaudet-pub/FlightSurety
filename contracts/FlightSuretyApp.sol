@@ -41,7 +41,9 @@ contract FlightSuretyApp {
     event MessageSender(address messageSender);
     event Testing(string testing);
     event AppCaller(address caller);
-    event OracleRegistered(address oracle, uint8 index0, uint8 index1, uint8 index2);
+    // event OracleRegistered(address oracle, uint8 index0, uint8 index1, uint8 index2);
+    event OracleRegistered(address oracle, uint8[3] indexes);
+    event KeyGenerated(bytes32 key, uint8 index, address airline, string flight, uint256 timestamp);
 
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
@@ -228,7 +230,8 @@ contract FlightSuretyApp {
 
         oracles[msg.sender] = Oracle({isRegistered: true, indexes: indexes});
 
-        emit OracleRegistered(msg.sender, indexes[0], indexes[1], indexes[2]);
+        // emit OracleRegistered(msg.sender, indexes[0], indexes[1], indexes[2]);
+        emit OracleRegistered(msg.sender, indexes);
     }
 
     function getMyIndexes() external view returns (uint8[3]) {
@@ -263,7 +266,7 @@ contract FlightSuretyApp {
         );
         require(
             oracleResponses[key].isOpen,
-            "Flight or timestamp do not match oracle request"
+            "Airline, flight or timestamp do not match oracle request"
         );
 
         oracleResponses[key].responses[statusCode].push(msg.sender);
