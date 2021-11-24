@@ -47,14 +47,21 @@ export default class Contract {
 
     initialize(callback) {
         this.web3.eth.getAccounts((error, accts) => {
+            accts.forEach((a) => {
+                this.web3.eth.getBalance(a).then((weiBalance) => {
+                    let ethBalance = this.web3.utils.fromWei(`${weiBalance}`, "ether");
+                    console.log(`${a}: ${ethBalance}`);
+                });
+            });
 
             this.owner = accts[0];
+
             accounts = accts;
             let counter = 1;
 
             while (this.airlines.length < 5) {
                 this.airlines.push(accts[counter++]);
-                console.log(accts[counter - 1]);
+                // console.log(accts[counter - 1]);
             }
 
             while (this.passengers.length < 5) {
@@ -62,13 +69,32 @@ export default class Contract {
             }
 
             let self = this;
+
             self.flightSuretyApp.events.OracleRegistered((error, result) => {
                 if (error) {
                     console.log(`App.OracleRegistered.error: ${error}`);
                 }
                 else {
                     // console.log(`App.OracleRegistered.result: ${JSON.stringify(result, null, 2)}`);
-                    console.log(`App.OracleRegistered.result: ${result.returnValues.oracle}`);
+                    // console.log(`App.OracleRegistered.result: ${result.returnValues.oracle}`);
+                }
+            });
+
+            self.flightSuretyApp.events.AirlineRegistered((error, result) => {
+                if (error) {
+                    console.log(`App.AirlineRegistered error: ${error}`);
+                }
+                else {
+                    console.log(`App.AirlineRegistered: ${JSON.stringify(result, null, 2)}`);
+                }
+            });
+
+            self.flightSuretyApp.events.FlightRegistered((error, result) => {
+                if (error) {
+                    console.log(`App.FlightRegistered error: ${error}`);
+                }
+                else {
+                    console.log(`App.FlightRegistered: ${JSON.stringify(result, null, 2)}`);
                 }
             });
 
@@ -102,7 +128,6 @@ export default class Contract {
                 }
             });
 
-
             let one_eth = self.web3.utils.toWei("1", "ether");
             for (let ii = 0; ii < accounts.length; ii++) {
                 self.flightSuretyApp.methods.registerOracle().send({ from: accounts[ii], value: one_eth, gas: 5000000 }, (error, result) => {
@@ -110,7 +135,6 @@ export default class Contract {
                         console.log(`registerOracle ${ii} error: ${error}`);
                     }
                     else {
-                        // console.log(`registerOracle 1 result: ${result}`);
                         console.log(`registering oracle ${ii}: ${accounts[ii]}`);
                     }
                 });
@@ -120,9 +144,9 @@ export default class Contract {
         });
     }
 
-    isOperational(callback) {
+    async isOperational(callback) {
         let self = this;
-        self.flightSuretyApp.methods
+        return await self.flightSuretyApp.methods
             .isOperational()
             .call({ from: self.owner }, callback);
     }
@@ -134,7 +158,6 @@ export default class Contract {
             flight: flight,
             timestamp: Math.floor(Date.now() / 1000)
         }
-        console.log(`fetchFlightStatus: timestamp: ${payload.timestamp}`);
         self.flightSuretyApp.methods
             .fetchFlightStatus(payload.airline, payload.flight, payload.timestamp)
             .send({ from: self.owner }, (error, result) => {
@@ -146,19 +169,47 @@ export default class Contract {
         let airlineAddress = airline;
         if (!this.web3.utils.isAddress(airlineAddress)) {
             console.log(`not a valid address: ${airlineAddress}`);
-            airlineAddress = 0;
+            return;
         }
 
-        let self = this;
-        self.flightSuretyApp.methods.registerAirline(airlineAddress).send({ from: self.owner }, (error, result) => {
+        console.log(`this.owner: ${this.owner}`);
+
+        this.flightSuretyApp.methods.registerAirline(airlineAddress).send({ from: this.owner }, (error, result) => {
             if (error) {
-                console.log(`registerAirline.error: ${error}`);
+                console.log(`registerAirline error: ${error}`);
                 alert(error.message.split(":").pop().replace('revert', ''));
             }
             else {
-                console.log(`registerAirline.result: ${result}`);
+                console.log(`registerAirline result: ${result}`);
             }
         });
+    }
 
+    registerFlight(airline, flightNumber) {
+        if (!this.web3.utils.isAddress(airline)) {
+            console.log(`not a valid address: ${airline}`);
+            return;
+        }
+
+        this.flightSuretyApp.methods.registerFlight(flightNumber).send({ from: airline, gas: 5000000 }, (error, result) => {
+            if (error) {
+                console.log(`registerFlight error: ${error}`);
+                alert(error.message.split(":").pop().replace('revert', ''));
+            }
+            else {
+                console.log(`registerFlight result: ${result}`);
+            }
+        });
     }
 }
+
+
+
+
+
+
+
+
+
+
+

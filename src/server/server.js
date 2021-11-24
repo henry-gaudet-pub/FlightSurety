@@ -58,106 +58,24 @@ flightSuretyApp.events.OracleRequest({
                     console.log(`    flight ${event.returnValues.flight}`);
                     console.log(`    timestamp ${event.returnValues.timestamp}`);
                     flightSuretyApp.methods.submitOracleResponse(
-                                            requestedIndex,
-                                            event.returnValues.airline,
-                                            event.returnValues.flight,
-                                            event.returnValues.timestamp,
-                                            10
-                                        ).send({ from: oracleAddress }, (error, result) => {
-                                            if (error) {
-                                                console.log(`submitOracleResponse error: ${error}`);
-                                            }
-                                            else {
-                                                console.log(`submitOracleResponse result: ${result}`);
-                                            }
-                                        });
+                        requestedIndex,
+                        event.returnValues.airline,
+                        event.returnValues.flight,
+                        event.returnValues.timestamp,
+                        10
+                    ).send({ from: oracleAddress }, (error, result) => {
+                        if (error) {
+                            console.log(`submitOracleResponse error: ${error}`);
+                        }
+                        else {
+                            console.log(`submitOracleResponse result: ${result}`);
+                        }
+                    });
                 }
             });
         });
-
-        //         for (let ii = 0; ii < result.length; ii++) {
-        //             if (result[ii] === requestedIndex) {
-        //                 console.log(`  requested index ${requestedIndex} matches for address ${oracleAddress}`);
-        //                 flightSuretyApp.methods.submitOracleResponse(
-        //                     requestedIndex,
-        //                     flightMap[event.returnValues.flight],
-        //                     event.returnValues.flight,
-        //                     event.returnValues.timestamp,
-        //                     10
-        //                 ).send({ from: oracleAddress }, (error, result) => {
-        //                     if (error) {
-        //                         console.log(`submitOracleResponse error: ${error}`);
-        //                     }
-        //                     else {
-        //                         console.log(`submitOracleResponse result: ${result}`);
-        //                     }
-        //                 });
-        //                 oracleFound = true;
-        //                 break;
-        //         }
-        //     }
-        // });
-        //     console.log("=====================");
-        //     if (oracleFound) break;
-        // }
     }
 });
-
-// web3.eth.getAccounts((error, accts) => {
-// accounts = accts;
-// web3.eth.defaultAccount = accts[event.returnValues.index];
-// console.log(`accts: ${accounts}`);
-// console.log(`event.returnValues.index: ${event.returnValues.index}`);
-// }).then((error, result) => {
-// console.log(`result: ${result}`);
-// console.log(`defaultAccount: ${web3.eth.defaultAccount}`);
-// flightSuretyApp.methods.getMyIndexes().call({from: web3.eth.defaultAccount}, (error, result) => {
-//     if (error) {
-//         console.log(`getMyIndexes error: ${error}`);
-//     }
-//     console.log(`getMyIndexes result: ${result}`);
-
-//     console.log(`getMyIndexes result: ${Object.getOwnPropertyNames(result)}`);
-//     for (let ii = 0; ii < result.length; ii++) {
-//         if (result[ii] === )
-//     }
-
-// })
-// flightSuretyApp.methods.submitOracleResponse(
-//     event.returnValues.index,
-//     flightMap[event.returnValues.flight],
-//     event.returnValues.flight,
-//     Math.floor(Date.now() / 1000),
-//     10
-// ).send({from: web3.eth.defaultAccount}, (error, result) => {
-//     if (error) {
-//         console.log(error);
-//     }
-//     else {
-//         console.log(result);
-//     }
-// }).catch(console.log);
-// }).catch(console.log);
-// console.log(`flightMap["asdf"]: ${flightMap["asdf"]}`);
-// console.log(`event.returnValues.flight: ${event.returnValues.flight}`);
-// console.log(`flightMap[event.returnValues.flight]: ${flightMap[event.returnValues.flight]}`);
-/// console.log(event);
-// flightSuretyApp.methods.submitOracleResponse(
-//     event.returnValues.index,
-//     flightMap[event.returnValues.flight],
-//     event.returnValues.flight,
-//     Math.floor(Date.now() / 1000),
-//     10
-// ).send({ from: web3.eth.accounts[0] }, (error, result) => {
-//     if (error) {
-//         console.log(error);
-//     }
-//     else {
-//         console.log(result);
-//     }
-// });
-//     }
-// });
 
 const app = express();
 app.get('/api', (req, res) => {

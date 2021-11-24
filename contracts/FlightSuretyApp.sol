@@ -41,7 +41,8 @@ contract FlightSuretyApp {
     event MessageSender(address messageSender);
     event Testing(string testing);
     event AppCaller(address caller);
-    // event OracleRegistered(address oracle, uint8 index0, uint8 index1, uint8 index2);
+    event FlightRegistered(address airline, string flightNumber);
+    event AirlineRegistered(address airline);
     event OracleRegistered(address oracle, uint8[3] indexes);
     event KeyGenerated(bytes32 key, uint8 index, address airline, string flight, uint256 timestamp);
 
@@ -71,7 +72,7 @@ contract FlightSuretyApp {
         _;
     }
 
-    modifier isRegistered(address airline) {
+    modifier isRegisteredAirline(address airline) {
         require(
             dataContract.isRegistered(msg.sender),
             "Caller is not a registered airline"
@@ -111,6 +112,7 @@ contract FlightSuretyApp {
      */
     function registerAirline(address airlineToRegister) external view {
         dataContract.registerAirline(airlineToRegister);
+        emit AirlineRegistered(airlineToRegister);
     }
 
     /**
@@ -119,7 +121,7 @@ contract FlightSuretyApp {
      */
     function registerFlight(string flightNumber)
         external
-        isRegistered(msg.sender)
+        isRegisteredAirline(msg.sender)
     {
         uint256 timestamp = block.timestamp;
         address airline = msg.sender;
@@ -131,6 +133,8 @@ contract FlightSuretyApp {
             updatedTimestamp: timestamp,
             airline: airline
         });
+
+        emit FlightRegistered(airline, flightNumber);
     }
 
     /**
@@ -142,7 +146,11 @@ contract FlightSuretyApp {
         string memory flightNumber,
         uint256 timestamp,
         uint8 statusCode
-    ) internal pure {}
+    ) internal {
+        bytes32 key = getFlightKey(airline, flightNumber, timestamp);
+        flights[key].statusCode = statusCode;
+        flights[key].updatedTimestamp = timestamp;
+    }
 
     // Generate a request for oracles to fetch flight information
     function fetchFlightStatus(
